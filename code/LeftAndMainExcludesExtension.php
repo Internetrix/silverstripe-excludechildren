@@ -40,16 +40,28 @@ class LeftAndMainExcludesExtension extends DataExtension {
 			$next = DataObject::get($className)
 				 ->filter('ParentID', $record->ParentID)
 				 ->filter('Sort:GreaterThan', $record->Sort);
-			$next = $next->exclude('ClassName', $parent->getExcludedClasses())->first();
-			if (!$next) {
+			
+			if ($next) {
+				if ($parent->hasMethod("getExcludedClasses")){
+					$next = $next->exclude('ClassName', $parent->getExcludedClasses())->first();
+				} else {
+					$next = $next->first();
+				}
+			} else {
 				$prev = DataObject::get($className)
 				->filter('ParentID', $record->ParentID)
 				->filter('Sort:LessThan', $record->Sort)
 				->reverse();
-				$prev = $prev->exclude('ClassName', $parent->getExcludedClasses())->first();
 			}
 				
-			
+			if ($prev) {
+				if ($parent->hasMethod("getExcludedClasses")){
+					$prev = $prev->exclude('ClassName', $parent->getExcludedClasses())->first();
+				} else {
+					$prev = $prev->first();
+				}
+			}
+				
 			$link = Controller::join_links($recordController->Link("show"), $record->ID);
 			$html = LeftAndMain_TreeNode::create($record, $link, $this->owner->isCurrentPage($record))
 				->forTemplate() . '</li>';
