@@ -72,6 +72,10 @@ class LeftAndMainExcludesExtension extends DataExtension {
 				'NextID' => $next ? $next->ID : null,
 				'PrevID' => $prev ? $prev->ID : null
 			);
+			
+			if ($record->hasMethod("updateTreeNodeData")){
+				$data[$id] = $record->updateTreeNodeData($data[$id]);
+			}
 		}
 		$this->owner->response->addHeader('Content-Type', 'text/json');
 		return Convert::raw2json($data);
