@@ -22,27 +22,33 @@ class ExcludeChildren extends DataExtension {
 		return $this->hiddenChildren;
 	}
 	
-	public function getFilteredChildren($staged){
-		$action = Controller::curr()->getAction();
-		if (in_array($action, array('treeview','getsubtree'))) {
-			return $staged->exclude('ClassName', $this->getExcludedClasses());
+	public function getFilteredChildren($children) {
+		// Optionally force exclusion beyond CMS (eg. exclude from $Children as well)
+		$controller = Controller::curr();
+		$action = $controller->getAction();
+		if ($this->owner->config()->get("force_exclusion_beyond_cms")
+			|| ($controller instanceof LeftAndMain) && in_array($action, array("treeview", "listview", "getsubtree"))
+		) {
+			//if the page class has a getExcludedChildren function, use it to supply the list of children
+			if ($this->owner->hasMethod('getExcludedChildren')) {
+				return $this->owner->getExcludedChildren($children);
+			}
+
+			return $children->exclude('ClassName', $this->getExcludedClasses());
 		}
-		return $staged;
-		
-		// Another interesting approach, limiting filtering to only the CMS:
-		// get_class($controller) == "CMSPagesController"
-		// && in_array($controller->getAction(), array("treeview", "listview", "getsubtree"));
+
+		return $children;
 	}
 
-    public function stageChildren($showAll = false){
+	public function stageChildren($showAll = false){
 		$children = $this->hierarchyStageChildren($showAll);
 		return $this->getFilteredChildren($children);
-    }
+	}
 
-    public function liveChildren($showAll = false, $onlyDeletedFromStage = false){
+	public function liveChildren($showAll = false, $onlyDeletedFromStage = false){
 		$children = $this->hierarchyLiveChildren($showAll, $onlyDeletedFromStage);
 		return $this->getFilteredChildren($children);
-    }
+	}
 	
 	/**
 	 * Duplicated & renamed from the Hierarchy::tageChildren() because we're overriding the original method:
