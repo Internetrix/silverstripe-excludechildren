@@ -1,6 +1,6 @@
-<div class="cms-content-toolbar">
-	<% include CMSPagesController_ContentToolActions View='Tree' %>
-</div>
+
+<% include CMSPagesController_ContentToolActions View='Tree' %>
+
 
 <div class="ss-dialog cms-page-add-form-dialog cms-dialog-content" id="cms-page-add-form" title="<% _t('CMSMain.AddNew', 'Add new page') %>">
 	$AddForm
